@@ -3,8 +3,11 @@ const VELOCITY_DECAY = 0.9;
 var pruningRange = document.getElementById('pruningRange');
 var svg = d3.select("#field");
 var field = document.getElementById('field');
-var width = field.clientWidth,
-    height = field.clientHeight;
+var width = field.getBoundingClientRect().width,
+    height = field.getBoundingClientRect().height;
+
+console.log(width, height);
+console.log();
 
 var color = d3.scaleOrdinal(d3.schemeCategory20);
 
