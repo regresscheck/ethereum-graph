@@ -35,8 +35,8 @@ function linkStrokeWidth(d) {
 }
 
 function pruningFunction(a, b) {
-    return b.score - 100 * (b.connections === 0) + b.blockNumber - b.biggestNeighbor.connections * 0.2
-        - a.score + 100 * (b.connections === 0) - a.blockNumber + a.biggestNeighbor.connections * 0.2;
+    return Math.log(b.score) + b.connections - 100 * (b.connections === 0) + b.blockNumber - b.biggestNeighbor.connections * 0.1
+        - Math.log(a.score) - a.connections + 100 * (b.connections === 0) - a.blockNumber + a.biggestNeighbor.connections * 0.1;
 }
 
 function ticked() {

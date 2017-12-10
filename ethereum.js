@@ -1,4 +1,4 @@
-const PRELOAD_BLOCKS = 30;
+const PRELOAD_BLOCKS = 5;
 
 var web3 = new Web3();
 
