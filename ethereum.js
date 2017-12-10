@@ -51,5 +51,5 @@ if (web3.isConnected()) {
     }
     setInterval(tickBlockchain, 3000);
 } else {
-    console.log('Could not connect to node');
+    document.getElementById('node-info').style.visibility = 'visible';
 }
