@@ -1,3 +1,6 @@
+const VELOCITY_DECAY = 0.9;
+
+var pruningRange = document.getElementById('pruningRange');
 var svg = d3.select("#field");
 var field = document.getElementById('field');
 var width = field.clientWidth,
@@ -10,8 +13,6 @@ var links = [];
 var hashVertices = {};
 var hashLinks = {};
 var latestBlockNumber = 0;
-
-const VELOCITY_DECAY = 0.9;
 
 function openInNewTab(url) {
     var win = window.open(url, '_blank');
@@ -31,8 +32,8 @@ function linkStrokeWidth(d) {
 }
 
 function pruningFunction(a, b) {
-    return b.connections - 100 * (b.connections === 0) + b.blockNumber - b.biggestNeighbor.connections * 0.2
-        - a.connections + 100 * (b.connections === 0) - a.blockNumber + a.biggestNeighbor.connections * 0.2;
+    return b.score - 100 * (b.connections === 0) + b.blockNumber - b.biggestNeighbor.connections * 0.2
+        - a.score + 100 * (b.connections === 0) - a.blockNumber + a.biggestNeighbor.connections * 0.2;
 }
 
 function ticked() {
@@ -120,7 +121,7 @@ function getOrCreateVertex(hash) {
     return vertex;
 }
 
-function getOrCreateEdge(from, to) {
+function getOrCreateEdge(from, to, score) {
     var edge;
     var hash = edgeHash(from.id, to.id);
     if (hash in hashLinks) {
@@ -139,8 +140,11 @@ function getOrCreateEdge(from, to) {
         links.push(edge);
         edge.placed = true;
         from.connections += 1;
+        from.score += score;
         to.connections += 1;
+        to.score += score;
     }
+    edge.score += score;
     return edge;
 }
 
@@ -166,7 +170,6 @@ function filterInPlace(array, condition) {
 }
 
 function updateVertex(vertex, connectedVertex, blockNumber) {
-    vertex.score += 1;
     vertex.blockNumber = blockNumber;
     if (!vertex.placed) {
         nodes.push(vertex);
@@ -204,11 +207,10 @@ function processEdge(from, to, value, blockNumber) {
     updateVertex(fromVertex, toVertex, blockNumber);
     updateVertex(toVertex, fromVertex, blockNumber);
 
-    var edge = getOrCreateEdge(fromVertex, toVertex);
-    edge.score += value;
+    var edge = getOrCreateEdge(fromVertex, toVertex, value);
     edge.blockNumber = blockNumber;
     nodes.sort(pruningFunction);
-    var maxNodes = document.getElementById('pruningRange').value;
+    var maxNodes = pruningRange.value;
     for (var i = maxNodes; i < nodes.length; i++) {
         nodes[i].placed = false;
         nodes[i].biggestNeighbor = null;
@@ -217,7 +219,9 @@ function processEdge(from, to, value, blockNumber) {
     filterInPlace(links, function (link) {
         if (!link.source.placed || !link.target.placed) {
             link.source.connections -= 1;
+            link.source.score -= link.score;
             link.target.connections -= 1;
+            link.target.score -= link.score;
             link.placed = false;
             return false;
         }

@@ -1,9 +1,12 @@
+const PRELOAD_BLOCKS = 30;
+
 var web3 = new Web3();
 
 web3 = new Web3(Web3.givenProvider || new Web3.providers.HttpProvider("http://localhost:8545"));
 
 var lastBlockHash = '';
 var queue = [];
+
 
 function processBlock(blockId) {
     web3.eth.getBlock(blockId, true, function(err, block) {
@@ -43,7 +46,7 @@ function tickBlockchain() {
 
 if (web3.isConnected()) {
     var lastBlock = web3.eth.blockNumber;
-    for (var i = lastBlock - 100; i < lastBlock; i++) {
+    for (var i = lastBlock - PRELOAD_BLOCKS; i < lastBlock; i++) {
         processBlock(i);
     }
     setInterval(tickBlockchain, 3000);
